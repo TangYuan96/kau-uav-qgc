@@ -6,7 +6,7 @@
 # (c) 2009-2015 QGroundControl Developers
 # License terms set in COPYING.md
 # -------------------------------------------------
-
+QT += websockets
 QMAKE_PROJECT_DEPTH = 0 # undocumented qmake flag to force absolute paths in make files
 
 exists($${OUT_PWD}/qgroundcontrol.pro) {
@@ -396,7 +396,14 @@ HEADERS += \
     src/comm/MavlinkMessagesTimer.h \
     src/vehicleinfo.h \
     src/usedebug.h \
-    src/ReadUAVDataThread.h
+    src/ReadUAVDataThread.h \
+    src/threadsafe_queue.h \
+    src/datareceive.h \
+    src/globalv.h \
+    src/orderexethread.h \
+    src/statesendthread.h \
+    src/json.hpp \
+    epic_uav.h
 
 SOURCES += \
     src/api/QGCCorePlugin.cc \
@@ -405,7 +412,12 @@ SOURCES += \
     src/api/QmlComponentInfo.cc \
     src/comm/MavlinkMessagesTimer.cc \
     src/vehicleinfo.cpp \
-    src/ReadUAVDataThread.cpp
+    src/ReadUAVDataThread.cpp \
+    src/datareceive.cpp \
+    src/globalv.cpp \
+    src/orderexethread.cpp \
+    src/statesendthread.cpp \
+    src/threadsafe_queue.cpp
 
 #
 # Unit Test specific configuration goes here (requires full debug build with all plugins)

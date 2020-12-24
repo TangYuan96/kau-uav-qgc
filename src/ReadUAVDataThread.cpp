@@ -25,6 +25,17 @@ void saveValue(double* tempValue, Fact* value, char* valueName)
         }
 }
 
+
+void pushInfo2sendMsgQueue(VehicleInfo* temp)
+{
+
+
+
+
+}
+
+
+
 void saveAsVehicleInfo(Vehicle* vehicle1, VehicleInfo* temp)
 {
 

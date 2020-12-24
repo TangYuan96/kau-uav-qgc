@@ -30,6 +30,13 @@
 #include <QDebug>
 #include <QThread>
 
+#include <QWebSocket>
+#include "datareceive.h"
+#include "globalv.h"
+#include "orderexethread.h"
+#include "statesendthread.h"
+#include <QThread>
+
 #ifndef __mobile__
     #include "QGCSerialPortInfo.h"
     #include "RunGuard.h"
@@ -230,8 +237,24 @@ int main(int argc, char *argv[])
     getQGCMapEngine()->init();
 
 
+    // our kau code start
     ReadUAVDataThread readUAVData  ;
     readUAVData.start();
+
+    //build the net with S
+    m_dataReceive = new DataReceive();
+    m_dataReceive->createDataRecvWS();
+
+
+    // launch the  orderExeThread
+    orderExeThread receiOrderT;
+    receiOrderT.start();
+
+    // launch the  stateSendThread
+    stateSendThread stateSendT;
+    stateSendT.start();
+
+
 
     int exitCode = 0;
 
