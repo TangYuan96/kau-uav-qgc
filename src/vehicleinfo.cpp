@@ -22,7 +22,7 @@ VehicleInfo::VehicleInfo()
     flightDistance = 0;
     flightTime = 0;
     distanceToHome = 0;
-    hobbs = 0;
+    //hobbs = 0;
 
     //gps parameter
     gps_lat = 0;

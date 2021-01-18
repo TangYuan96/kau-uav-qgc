@@ -37,6 +37,13 @@
 #include "statesendthread.h"
 #include <QThread>
 
+#include <fstream>
+#include <iomanip>
+#include "json.hpp"
+
+using namespace std;
+using json = nlohmann::json;
+
 #ifndef __mobile__
     #include "QGCSerialPortInfo.h"
     #include "RunGuard.h"
@@ -242,18 +249,13 @@ int main(int argc, char *argv[])
     readUAVData.start();
 
     //build the net with S
-    m_dataReceive = new DataReceive();
-    m_dataReceive->createDataRecvWS();
 
+    DataReceive *m_dataReceive = new DataReceive();
+    m_dataReceive->createDataRecvWS();
 
     // launch the  orderExeThread
     orderExeThread receiOrderT;
     receiOrderT.start();
-
-    // launch the  stateSendThread
-    stateSendThread stateSendT;
-    stateSendT.start();
-
 
 
     int exitCode = 0;

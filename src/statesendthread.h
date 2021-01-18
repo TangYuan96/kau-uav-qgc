@@ -12,7 +12,12 @@ class stateSendThread : public QThread
 public:
     explicit stateSendThread(QObject *parent = 0);
 
+
+
     virtual void run();
+
+signals:
+    void sendMsg(QString);
 };
 
 #endif // STATESENDTHREAD_H

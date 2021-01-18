@@ -28,7 +28,7 @@ public:
     double flightDistance ;
     double flightTime ;
     double distanceToHome ;
-    double hobbs ;
+    //double hobbs ;
 
     //gps parameter
     double             gps_lat ;
