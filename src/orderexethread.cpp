@@ -1,9 +1,10 @@
 #include "orderexethread.h"
 #include "globalv.h"
+#include <usedebug.h>
 
 orderExeThread::orderExeThread(QObject *parent) : QThread(parent)
 {
-  qDebug()<<"orderExeThread:"<<QThread::currentThreadId();
+  qDebug2("orderExeThread:%d",QThread::currentThreadId());
 }
 
 
@@ -34,13 +35,13 @@ void orderExeThread::run()
            {// not empty,and read the order
 
                 receiMsgQueue.pop(orderMsg);
-                qDebug()<<"receive msg:"<<orderMsg;
+                qDebug3("receive msg:%s",orderMsg);
                 handleOrder(orderMsg);
            }
        }
        else //no msg ,and sleep
        {
-            qDebug()<<"no receive msg";
+            qDebug2("no receive order msg");
             QThread::sleep(1);
        }
    }

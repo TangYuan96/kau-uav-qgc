@@ -11,10 +11,8 @@
 
 ReadUAVDataThread::ReadUAVDataThread(QObject *parent) : QThread(parent)
 {
-  qDebug()<<"ReadUAVDataThread:"<<QThread::currentThreadId();
+  qDebug2("ReadUAVDataThread:%d",QThread::currentThreadId());
 }
-
-
 
 
 void saveValue(double* tempValue, Fact* value, char* valueName)
@@ -23,29 +21,26 @@ void saveValue(double* tempValue, Fact* value, char* valueName)
     *tempValue = value->rawValue().toDouble(&convertOk);
     if (convertOk == false)
         {
-            qdebug1("%s converError!",valueName);
+            qDebug1("%s converError!",valueName);
+            *tempValue = -6;  //set -6 as error Num
         }
     else
         {
-            qdebug3("temp->%s:%f",valueName, *tempValue) ;
+            qDebug3("temp->%s:%f",valueName, *tempValue) ;
         }
 }
 
 
 
-
 void saveAsVehicleInfo(Vehicle* vehicle1, VehicleInfo* temp)
 {
-
-    qDebug()<<"saveAsVehicleInfo";
-    ////    VehicleInfo temp;
     bool convertOk = false;
 
     temp->id = vehicle1->id();
-    qDebug()<< "temp->id:"<<temp->id;
+    qDebug3("temp->id:%d",temp->id);
 
     temp->active = vehicle1->active();
-    qDebug()<< "temp->active:"<<temp->active;
+    qDebug3("temp->active:%d",temp->active);
 
     //temp->roll = vehicle1->roll()->rawValue().toDouble(&convertOk);
     saveValue(&(temp->roll), vehicle1->roll(), "roll");
@@ -292,81 +287,83 @@ void saveAsVehicleInfo(Vehicle* vehicle1, VehicleInfo* temp)
 // convert the value of every uav to Json, and save at the send Queue
 void  convertJson2SendQue(threadsafe_queue<QString>* sendMsgQueue1, VehicleInfo* temp)
 {
-    //QString VehicleInfoString ;
+    json root2;
 
-    json j;
     // save the vehicle info
-    j["id"]= temp->id;
-    j["roll"]= temp->roll;
-    j["pitch"]= temp->pitch;
-    j["heading"]= temp->heading;
-    j["rollRate"]= temp->rollRate;
-    j["pitchRate"]= temp->pitchRate;
-    j["yawRate"]= temp->yawRate;
-    j["groundSpeed"]= temp->groundSpeed;
-    j["airSpeed"]= temp->airSpeed;
-    j["climbRate"]= temp->climbRate;
-    j["altitudeRelative"]= temp->altitudeRelative;
-    j["altitudeAMSL"]= temp->altitudeAMSL;
-    j["flightDistance"]= temp->flightDistance;
-    j["flightTime"]= temp->flightTime;
-    j["distanceToHome"]= temp->distanceToHome;
-    j["gps_lat"]= temp->gps_lat;
-    j["gps_lon"]= temp->gps_lon;
-    j["gps_hdop"]= temp->gps_hdop;
-    j["gps_vdop"]= temp->gps_vdop;
-    j["gps_courseOverGround"]= temp->gps_courseOverGround;
-    j["gps_count"]= temp->gps_count;
-    j["gps_lock"]= temp->gps_lock;
-    j["battery1_percentRemaining"]= temp->battery1_percentRemaining;
-    j["battery1_mahConsumed"]= temp->battery1_mahConsumed;
-    j["battery1_current"]= temp->battery1_current;
-    j["battery1_temperature"]= temp->battery1_temperature;
-    j["battery1_cellCount"]= temp->battery1_cellCount;
-    j["battery1_instantPower"]= temp->battery1_instantPower;
-    j["battery1_timeRemaining"]= temp->battery1_timeRemaining;
-    j["battery1_chargeState"]= temp->battery1_chargeState;
-    j["battery2_percentRemaining"]= temp->battery2_percentRemaining;
-    j["battery2_mahConsumed"]= temp->battery2_mahConsumed;
-    j["battery2_current"]= temp->battery2_current;
-    j["battery2_temperature"]= temp->battery2_temperature;
-    j["battery2_cellCoun"]= temp->battery2_cellCount;
-    j["battery2_instantPower"]= temp->battery2_instantPower;
-    j["battery2_timeRemaining"]= temp->battery2_timeRemaining;
-    j["battery2_chargeState"]= temp->battery2_chargeState;
-    j["ind_direction"]= temp->wind_direction;
-    j["wind_speed"]= temp->wind_speed;
-    j["wind_verticalSpeed"]= temp->wind_verticalSpeed;
-    j["vibration_xAxis"]= temp->vibration_xAxis;
-    j["vibration_yAxis"]= temp->vibration_yAxis;
-    j["vibration_zAxis"]= temp->vibration_zAxis;
-    j["vibration_clipCount1"]= temp->vibration_clipCount1;
-    j["vibration_clipCount2"]= temp->vibration_clipCount2;
-    j["vibration_clipCount3"]= temp->vibration_clipCount3;
-    j["temperature1"]= temp->temperature1;
-    j["temperature2"]= temp->temperature2;
-    j["temperature3"]= temp->temperature3;
-    j["setpoint_roll"]= temp->setpoint_roll;
-    j["setpoint_pitch"]= temp->setpoint_pitch;
-    j["setpoint_yaw"]= temp->setpoint_yaw;
-    j["setpoint_rollRate"]= temp->setpoint_rollRate;
-    j["setpoint_pitchRate"]= temp->setpoint_pitchRate;
-    j["setpoint_yawRate"]= temp->setpoint_yawRate;
-    j["distanceSensor_rotationNone"]= temp->distanceSensor_rotationNone;
-    j["distanceSensor_rotationYaw45"]= temp->distanceSensor_rotationYaw45;
-    j["distanceSensor_rotationYaw90"]= temp->distanceSensor_rotationYaw90;
-    j["distanceSensor_rotationYaw135"]= temp->distanceSensor_rotationYaw135;
-    j["distanceSensor_rotationYaw180"]= temp->distanceSensor_rotationYaw180;
-    j["distanceSensor_rotationYaw225"]= temp->distanceSensor_rotationYaw225;
-    j["distanceSensor_rotationYaw270"]= temp->distanceSensor_rotationYaw270;
-    j["distanceSensor_rotationYaw315"]= temp->distanceSensor_rotationYaw315;
-    j["distanceSensor_rotationPitch90"]= temp->distanceSensor_rotationPitch90;
-    j["distanceSensor_rotationPitch270"]= temp->distanceSensor_rotationPitch270;
+    root2["id"]= temp->id;
+    root2["active"]= temp->active;
+    root2["roll"]= temp->roll;
+    root2["pitch"]= temp->pitch;
+    root2["heading"]= temp->heading;
+    root2["rollRate"]= temp->rollRate;
+    root2["pitchRate"]= temp->pitchRate;
+    root2["yawRate"]= temp->yawRate;
+    root2["groundSpeed"]= temp->groundSpeed;
+    root2["airSpeed"]= temp->airSpeed;
+    root2["climbRate"]= temp->climbRate;
+    root2["altitudeRelative"]= temp->altitudeRelative;
+    root2["altitudeAMSL"]= temp->altitudeAMSL;
+    root2["flightDistance"]= temp->flightDistance;
+    root2["flightTime"]= temp->flightTime;
+    root2["distanceToHome"]= temp->distanceToHome;
+    root2["gps_lat"]= temp->gps_lat;
+    root2["gps_lon"]= temp->gps_lon;
+    root2["gps_hdop"]= temp->gps_hdop;
+    root2["gps_vdop"]= temp->gps_vdop;
+    root2["gps_courseOverGround"]= temp->gps_courseOverGround;
+    root2["gps_count"]= temp->gps_count;
+    root2["gps_lock"]= temp->gps_lock;
+    root2["battery1_percentRemaining"]= temp->battery1_percentRemaining;
+    root2["battery1_mahConsumed"]= temp->battery1_mahConsumed;
+    root2["battery1_current"]= temp->battery1_current;
+    root2["battery1_temperature"]= temp->battery1_temperature;
+    root2["battery1_cellCount"]= temp->battery1_cellCount;
+    root2["battery1_instantPower"]= temp->battery1_instantPower;
+    root2["battery1_timeRemaining"]= temp->battery1_timeRemaining;
+    root2["battery1_chargeState"]= temp->battery1_chargeState;
+    root2["battery2_percentRemaining"]= temp->battery2_percentRemaining;
+    root2["battery2_mahConsumed"]= temp->battery2_mahConsumed;
+    root2["battery2_current"]= temp->battery2_current;
+    root2["battery2_temperature"]= temp->battery2_temperature;
+    root2["battery2_cellCoun"]= temp->battery2_cellCount;
+    root2["battery2_instantPower"]= temp->battery2_instantPower;
+    root2["battery2_timeRemaining"]= temp->battery2_timeRemaining;
+    root2["battery2_chargeState"]= temp->battery2_chargeState;
+    root2["ind_direction"]= temp->wind_direction;
+    root2["wind_speed"]= temp->wind_speed;
+    root2["wind_verticalSpeed"]= temp->wind_verticalSpeed;
+    root2["vibration_xAxis"]= temp->vibration_xAxis;
+    root2["vibration_yAxis"]= temp->vibration_yAxis;
+    root2["vibration_zAxis"]= temp->vibration_zAxis;
+    root2["vibration_clipCount1"]= temp->vibration_clipCount1;
+    root2["vibration_clipCount2"]= temp->vibration_clipCount2;
+    root2["vibration_clipCount3"]= temp->vibration_clipCount3;
+    root2["temperature1"]= temp->temperature1;
+    root2["temperature2"]= temp->temperature2;
+    root2["temperature3"]= temp->temperature3;
+    root2["setpoint_roll"]= temp->setpoint_roll;
+    root2["setpoint_pitch"]= temp->setpoint_pitch;
+    root2["setpoint_yaw"]= temp->setpoint_yaw;
+    root2["setpoint_rollRate"]= temp->setpoint_rollRate;
+    root2["setpoint_pitchRate"]= temp->setpoint_pitchRate;
+    root2["setpoint_yawRate"]= temp->setpoint_yawRate;
+    root2["distanceSensor_rotationNone"]= temp->distanceSensor_rotationNone;
+    root2["distanceSensor_rotationYaw45"]= temp->distanceSensor_rotationYaw45;
+    root2["distanceSensor_rotationYaw90"]= temp->distanceSensor_rotationYaw90;
+    root2["distanceSensor_rotationYaw135"]= temp->distanceSensor_rotationYaw135;
+    root2["distanceSensor_rotationYaw180"]= temp->distanceSensor_rotationYaw180;
+    root2["distanceSensor_rotationYaw225"]= temp->distanceSensor_rotationYaw225;
+    root2["distanceSensor_rotationYaw270"]= temp->distanceSensor_rotationYaw270;
+    root2["distanceSensor_rotationYaw315"]= temp->distanceSensor_rotationYaw315;
+    root2["distanceSensor_rotationPitch90"]= temp->distanceSensor_rotationPitch90;
+    root2["distanceSensor_rotationPitch270"]= temp->distanceSensor_rotationPitch270;
 
-
+    json root1;
+    root1["businessType"] = 701;
+    root1["data"]= root2;
 
     // json2string
-    std::string s = j.dump(4);
+    std::string s = root1.dump(4);
     QString qstr2 = QString::fromStdString(s);
     sendMsgQueue1->push(qstr2);
 }
@@ -375,65 +372,57 @@ void  convertJson2SendQue(threadsafe_queue<QString>* sendMsgQueue1, VehicleInfo*
 void ReadUAVDataThread::run()
 {
 //    QmlObjectListModel* vehiclesObject;
-
 //    VehicleInfo temp;
 
-
-    qDebug()<<"myThread run() start to execute";
-
-    qDebug()<<"current thread ID:"<<QThread::currentThreadId()<<'\n';
-        //emit myThreadSignal(count);
+    qDebug2("myThread run() start to execute");
+    qDebug2("current thread ID:%d",QThread::currentThreadId());
 
     int a = 1;
 
     for (a = 1;a<3;a++)
     {
         QThread::sleep(5);
-        qDebug()<<"time:%d"<<a;
+        qDebug2("time:%d",a);
     }
      myMultiVehicleManager =  qgcApp()->toolbox()->multiVehicleManager();
 
     // vehicles that have been connected
      myVehicles =  qgcApp()->toolbox()->multiVehicleManager()->vehicles();
-     qdebug2("get myVehicles  and myMultiVehicleManager");
+     qDebug2("get myVehicles  and myMultiVehicleManager");
 
 
     while(1)
     {
         QThread::sleep(2);
-        qdebug2("wait to read  last data") ;
-
+        qDebug3("wait to read  last data") ;
 
         if ( myMultiVehicleManager->activeVehicleAvailable())
             {
-                qdebug2("activeVehicleAvailable");
+                qDebug3("activeVehicleAvailable");
                 // clear all,wait new datas
                 // rewrite a  clear function to delete the space
 
-//              // get current active Vehicle
+                // get current active Vehicle
                 myActiveVehicle  =  myMultiVehicleManager->activeVehicle();
 
-                qdebug2("myVehicles count:%d", myVehicles->count());
+                qDebug3("myVehicles count:%d", myVehicles->count());
 
                 for (int i=0; i< myVehicles->count(); i++)
                 {
                     Vehicle* vehicle = qobject_cast<Vehicle*>((*myVehicles)[i]);
+
                     // change the data to  our format ,and save
                     VehicleInfo *temp = new VehicleInfo();
                     saveAsVehicleInfo(vehicle, temp);
                     convertJson2SendQue( &sendMsgQueue, temp);
-
                 }
-
             }
         else
-            {//now ,there is no active vehicle,wait next time
-                qdebug2("activeVehicleUnavailable()");
+            {
+                //now ,there is no active vehicle,wait next time
+                qDebug2("activeVehicleUnavailable()");
                 continue;
             }
     }
-
-
-
         exec();
 }

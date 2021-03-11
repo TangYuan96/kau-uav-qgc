@@ -94,5 +94,4 @@ VehicleInfo::VehicleInfo()
     distanceSensor_rotationYaw315  = 0;
     distanceSensor_rotationPitch90  = 0; 
     distanceSensor_rotationPitch270  = 0; 
-
 }

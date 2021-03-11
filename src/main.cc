@@ -7,7 +7,6 @@
  *
  ****************************************************************************/
 
-
 /**
  * @file
  *   @brief Main executable
@@ -243,20 +242,20 @@ int main(int argc, char *argv[])
     //-- Initialize Cache System
     getQGCMapEngine()->init();
 
+/*******************************************************/
 
     // our kau code start
-    ReadUAVDataThread readUAVData  ;
+    ReadUAVDataThread readUAVData;
     readUAVData.start();
 
-    //build the net with S
-
+    // build the net with S
     DataReceive *m_dataReceive = new DataReceive();
     m_dataReceive->createDataRecvWS();
 
-    // launch the  orderExeThread
+    // launch the orderExeThread
     orderExeThread receiOrderT;
     receiOrderT.start();
-
+/*******************************************************/
 
     int exitCode = 0;
 
