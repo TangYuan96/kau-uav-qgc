@@ -26,6 +26,7 @@
 #include "QGCApplication.h"
 #include "AppMessages.h"
 #include "ReadUAVDataThread.h"
+#include "WriteUAVDataThread.h"
 #include <QDebug>
 #include <QThread>
 
@@ -247,6 +248,9 @@ int main(int argc, char *argv[])
     // our kau code start
     ReadUAVDataThread readUAVData;
     readUAVData.start();
+
+    WriteUAVDataThread writeUAVData  ;
+    writeUAVData.start();
 
     // build the net with S
     DataReceive *m_dataReceive = new DataReceive();

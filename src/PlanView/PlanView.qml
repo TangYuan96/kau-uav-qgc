@@ -73,6 +73,22 @@ QGCView {
         insertComplexMissionItem(complexItemName, coordinate, _missionController.visualItems.count)
     }
 
+    function openPlan(){
+        if(_activeVehicle){
+            if(_activeVehicle.underControl){
+                if(_activeVehicle.undergroundFilepath !== ""){
+                    console.log("openPlannnnnnnn",_activeVehicle)
+                    masterController.loadFromFile(_activeVehicle.undergroundFilepath)
+                    masterController.fitViewportToItems()
+                    _missionController.setCurrentPlanViewIndex(0, true)
+                    _planMasterController.sendToVehicle()
+                    _activeVehicle.startMission()
+                }
+            }
+
+        }
+    }
+
     function insertComplexMissionItem(complexItemName, coordinate, index) {
         var sequenceNumber = _missionController.insertComplexMissionItem(complexItemName, coordinate, index)
         _missionController.setCurrentPlanViewIndex(sequenceNumber, true)
@@ -165,7 +181,12 @@ QGCView {
         Component.onCompleted: {
             start(false /* flyView */)
             _missionController.setCurrentPlanViewIndex(0, true)
+//            openPlan()
         }
+
+        property string    undergroundFilepath:           _activeVehicle ? _activeVehicle.undergroundFilepath : ""
+        onUndergroundFilepathChanged: {openPlan()}
+
 
         function waitingOnDataMessage() {
             _qgcView.showMessage(qsTr("Unable to Save/Upload"), qsTr("Plan is waiting on terrain data from server for correct altitude values."), StandardButton.Ok)

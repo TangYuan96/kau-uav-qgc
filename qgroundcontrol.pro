@@ -403,7 +403,8 @@ HEADERS += \
     src/orderexethread.h \
     src/statesendthread.h \
     src/json.hpp \
-    epic_uav.h
+    epic_uav.h \
+    src/WriteUAVDataThread.h
 
 SOURCES += \
     src/api/QGCCorePlugin.cc \
@@ -417,7 +418,8 @@ SOURCES += \
     src/globalv.cpp \
     src/orderexethread.cpp \
     src/statesendthread.cpp \
-    src/threadsafe_queue.cpp
+    src/threadsafe_queue.cpp \
+    src/WriteUAVDataThread.cpp
 
 #
 # Unit Test specific configuration goes here (requires full debug build with all plugins)

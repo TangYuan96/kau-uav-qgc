@@ -591,6 +591,29 @@ QGCView {
             }
         }
 
+        Rectangle{
+                //该控件的左侧和 toolStrip 的左侧对齐
+                anchors.left: toolStrip .right
+                //该控件的顶部位于 toolStrip 的底部
+                anchors.top: toolStrip .top
+                //控件顶部设置一个留白间隔
+                anchors.topMargin: _margins * 2
+                anchors.leftMargin: _margins * 2
+                //设置控件的宽度、高度、颜色
+                width: 400
+                height: 30
+                color: "red"
+                //为控件设置一个圆弧
+                radius: 4
+                visible: _activeVehicle ? _activeVehicle.underControl : false
+                z: _panel .z + 4
+                Text{
+                //为控件添加一个 text 区域，进行文本显示
+                anchors.fill: parent
+                text: qsTr ("The vehicle is being controlled in the background")
+                }
+                }
+
         GuidedActionsController {
             id:                 guidedActionsController
             missionController:  _missionController

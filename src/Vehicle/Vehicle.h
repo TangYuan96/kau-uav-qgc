@@ -547,6 +547,9 @@ public:
     Q_PROPERTY(quint64  vehicleUID                  READ vehicleUID                 NOTIFY vehicleUIDChanged)
     Q_PROPERTY(QString  vehicleUIDStr               READ vehicleUIDStr              NOTIFY vehicleUIDChanged)
 
+    Q_PROPERTY(bool      underControl       READ underControl       NOTIFY underControlChanged)
+    Q_PROPERTY(QString      undergroundFilepath       READ undergroundFilepath       NOTIFY undergroundFilepathChanged)
+
     /// Resets link status counters
     Q_INVOKABLE void resetCounters  ();
 
@@ -568,8 +571,20 @@ public:
     /// Command vehicle to land at current location
     Q_INVOKABLE void guidedModeLand(void);
 
+    void changeUnderControlValue(bool flag);
+    void changeUndergroundFilepathValue(QString path);
+
+    typedef struct {
+        MAV_CMD     command;
+        bool        showError;
+        double      rgParam6;
+    } MavCommandInfo;
+
+    MavCommandInfo returnMavCommandQueue(void);
+
     /// Command vehicle to takeoff from current location
     Q_INVOKABLE void guidedModeTakeoff(double altitudeRelative);
+
 
     /// @return The minimum takeoff altitude (relative) for guided takeoff.
     Q_INVOKABLE double minimumTakeoffAltitude(void);
@@ -610,6 +625,9 @@ public:
 
     Q_INVOKABLE void triggerCamera(void);
     Q_INVOKABLE void sendPlan(QString planFile);
+    Q_INVOKABLE void openPlan(QString filePath);
+
+    Q_INVOKABLE void  requestAllParameters(void);
 
 #if 0
     // Temporarily removed, waiting for new command implementation
@@ -859,6 +877,9 @@ public:
     static const int versionNotSetValue = -1;
 
     QString gitHash(void) const { return _gitHash; }
+    bool underControl(void) const { return _underControl; }
+    QString undergroundFilepath(void) const { return _undergroundFilepath; }
+
     quint64 vehicleUID(void) const { return _uid; }
     QString vehicleUIDStr();
 
@@ -989,6 +1010,8 @@ signals:
     void firmwareVersionChanged(void);
     void firmwareCustomVersionChanged(void);
     void gitHashChanged(QString hash);
+    void underControlChanged(bool underControl);
+    void undergroundFilepathChanged(QString path);
     void vehicleUIDChanged();
 
     /// New RC channel values
@@ -1270,6 +1293,8 @@ private:
     FIRMWARE_VERSION_TYPE _firmwareVersionType;
 
     QString _gitHash;
+    bool _underControl;
+    QString _undergroundFilepath;
     quint64 _uid;
 
     int _lastAnnouncedLowBatteryPercent;

@@ -168,6 +168,8 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _firmwareCustomPatchVersion(versionNotSetValue)
     , _firmwareVersionType(FIRMWARE_VERSION_TYPE_OFFICIAL)
     , _gitHash(versionNotSetValue)
+    , _underControl(false)
+    , _undergroundFilepath("")
     , _uid(0)
     , _lastAnnouncedLowBatteryPercent(100)
     , _priorityLinkCommanded(false)
@@ -353,6 +355,8 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _firmwareCustomPatchVersion(versionNotSetValue)
     , _firmwareVersionType(FIRMWARE_VERSION_TYPE_OFFICIAL)
     , _gitHash(versionNotSetValue)
+    , _underControl(false)
+    , _undergroundFilepath("")
     , _uid(0)
     , _lastAnnouncedLowBatteryPercent(100)
     , _rollFact             (0, _rollFactName,              FactMetaData::valueTypeDouble)
@@ -1065,6 +1069,17 @@ void Vehicle::_setCapabilities(uint64_t capabilityBits)
     qCDebug(VehicleLog) << QString("Vehicle %1 MISSION_COMMAND_INT").arg(_capabilityBits & MAV_PROTOCOL_CAPABILITY_COMMAND_INT ? supports : doesNotSupport);
     qCDebug(VehicleLog) << QString("Vehicle %1 GeoFence").arg(_capabilityBits & MAV_PROTOCOL_CAPABILITY_MISSION_FENCE ? supports : doesNotSupport);
     qCDebug(VehicleLog) << QString("Vehicle %1 RallyPoints").arg(_capabilityBits & MAV_PROTOCOL_CAPABILITY_MISSION_RALLY ? supports : doesNotSupport);
+}
+
+void Vehicle::changeUnderControlValue(bool flag){
+    _underControl = flag;
+    emit underControlChanged(_underControl);
+}
+
+void Vehicle::changeUndergroundFilepathValue(QString path){
+    _undergroundFilepath = path;
+    qDebug()<<"_undergroundFilepath-------------"<<_undergroundFilepath;
+    emit undergroundFilepathChanged(_undergroundFilepath);
 }
 
 void Vehicle::_handleAutopilotVersion(LinkInterface *link, mavlink_message_t& message)
@@ -2865,6 +2880,21 @@ void Vehicle::setCurrentMissionSequence(int seq)
     sendMessageOnLink(priorityLink(), msg);
 }
 
+Vehicle::MavCommandInfo Vehicle::returnMavCommandQueue(){
+    if (_mavCommandQueue.count()) {
+        for(int i =0; i<_mavCommandQueue.count(); i++){
+            qDebug()<<"_mavCommandQueue------------------------"<<_mavCommandQueue[i].command<<_mavCommandQueue[i].showError<<_mavCommandQueue[i].rgParam[6];
+            MavCommandInfo mavCommandInfo;
+            mavCommandInfo.command = _mavCommandQueue[i].command;
+            mavCommandInfo.showError = _mavCommandQueue[i].showError;
+            mavCommandInfo.rgParam6 = _mavCommandQueue[i].rgParam[6];
+//            QList<MavCommandInfo>   mavCommand;
+//            mavCommand.append();
+            return mavCommandInfo;
+        }
+    }
+}
+
 void Vehicle::sendMavCommand(int component, MAV_CMD command, bool showError, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
 {
     MavCommandQueueEntry_t entry;
@@ -2880,8 +2910,8 @@ void Vehicle::sendMavCommand(int component, MAV_CMD command, bool showError, flo
     entry.rgParam[4] = param5;
     entry.rgParam[5] = param6;
     entry.rgParam[6] = param7;
-
     _mavCommandQueue.append(entry);
+    returnMavCommandQueue();
 
     if (_mavCommandQueue.count() == 1) {
         _mavCommandRetryCount = 0;
@@ -3475,6 +3505,12 @@ void Vehicle::forceInitialPlanRequestComplete(void)
     emit initialPlanRequestCompleteChanged(true);
 }
 
+void Vehicle::openPlan(QString filePath){
+//    PlanMasterController::openPlanfromBackground(this,filePath);
+    qDebug()<<"undergroundFilepathChanged-------------";
+    this->changeUndergroundFilepathValue(filePath);
+}
+
 void Vehicle::sendPlan(QString planFile)
 {
     PlanMasterController::sendPlanToVehicle(this, planFile);
@@ -3528,6 +3564,18 @@ void Vehicle::_updateHighLatencyLink(bool sendCommand)
                            _highLatencyLink ? 1.0f : 0.0f); // request start/stop transmitting over high latency telemetry
         }
     }
+}
+
+void Vehicle:: requestAllParameters()
+{
+mavlink_message_t msg;
+mavlink_msg_param_request_list_pack_chan(
+_mavlink->getSystemId(),
+_mavlink->getComponentId(),
+priorityLink()->mavlinkChannel(),
+&msg,_id,MAV_COMP_ID_ALL);
+sendMessageOnLink(priorityLink(), msg);
+qDebug() << "==============send Vehicle::requestAllParameters===============" << _id << MAV_COMP_ID_ALL;
 }
 
 //-----------------------------------------------------------------------------
